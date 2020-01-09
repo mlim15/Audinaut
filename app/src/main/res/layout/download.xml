@@ -47,6 +47,7 @@
                         android:id="@+id/download_album_art_image"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:layout_margin="20dp"
                         android:scaleType="fitCenter" />
 
                 </RelativeLayout>

@@ -83,7 +83,6 @@ public class SubsonicActivity extends AppCompatActivity implements OnItemSelecte
     private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
     private static String theme;
     private static boolean fullScreen;
-    private static boolean darkByTime;
     private static ImageLoader IMAGE_LOADER;
 
     static {

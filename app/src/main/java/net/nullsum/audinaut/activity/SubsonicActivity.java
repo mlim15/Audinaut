@@ -24,6 +24,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -82,10 +83,17 @@ public class SubsonicActivity extends AppCompatActivity implements OnItemSelecte
     private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
     private static String theme;
     private static boolean fullScreen;
+    private static boolean darkByTime;
     private static ImageLoader IMAGE_LOADER;
 
     static {
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
+        // If Android Pie or older, set night mode by system clock
+        if (Build.VERSION.SDK_INT<29) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
+        } else {
+            // Else, for Android 10+, follow system dark mode setting
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+        }
     }
 
     final List<SubsonicFragment> backStack = new ArrayList<>();

@@ -1,6 +1,24 @@
 Changelog
 =========
 
+## Version 0.5.1
+_2020-04-30_
+* Add option to force server-side media scan
+* Change to local artist sorting (case-insensitive)
+* Fix crash while offline (#25)
+* Fix read timeout not being respected
+* Fix switching to playlist on app resume
+
+## Version 0.5.0
+_2020-01-15_
+* Add 24kbps and 48kbps options
+* Add adaptive icon
+* Add support for p= authentication
+* Change to MediaStyle playback notification
+* Fix SSID selection
+* Fix keyboard being visible when switching to now playing
+* Fix now playing icon when using light theme
+
 ## Version 0.4.1
 _2019-12-28_
 * Revert attempt to fix infinite loop as it sometimes deleted valid files.

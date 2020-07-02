@@ -41,9 +41,12 @@ import android.text.util.Linkify;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.app.Activity;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
@@ -69,6 +72,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -117,6 +123,11 @@ public final class Util {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean(Constants.PREFERENCES_KEY_OFFLINE, offline);
         editor.apply();
+    }
+
+    public static int getNetworkTimeoutMs(Context context) {
+        SharedPreferences prefs = getPreferences(context);
+        return Integer.parseInt(prefs.getString(Constants.PREFERENCES_KEY_NETWORK_TIMEOUT, "30000"));
     }
 
     public static boolean isScreenLitOnDownload(Context context) {
@@ -298,6 +309,8 @@ public final class Util {
     private static String getRestUrl(Context context, String method, SharedPreferences prefs, int instance, boolean allowAltAddress, @Nullable Map<String, String> parameters) {
         String serverUrl = prefs.getString(Constants.PREFERENCES_KEY_SERVER_URL + instance, null);
 
+        if (serverUrl == null) return "OFFLINE";
+
         HttpUrl.Builder builder;
         builder = HttpUrl.parse(serverUrl).newBuilder();
 
@@ -323,18 +336,24 @@ public final class Util {
         builder.addPathSegment("rest");
         builder.addPathSegment(method + ".view");
 
-        int hash = (username + password).hashCode();
-        Pair<String, String> values = tokens.get(hash);
-        if (values == null) {
-            String salt = new BigInteger(130, getRandom()).toString(32);
-            String token = md5Hex(password + salt);
-            values = new Pair<>(salt, token);
-            tokens.put(hash, values);
+        builder.addQueryParameter("u", username);
+
+        if (prefs.getBoolean(Constants.PREFERENCES_KEY_AUTH_METHOD + instance, true)) {
+            int hash = (username + password).hashCode();
+            Pair<String, String> values = tokens.get(hash);
+            if (values == null) {
+                String salt = new BigInteger(130, getRandom()).toString(32);
+                String token = md5Hex(password + salt);
+                values = new Pair<>(salt, token);
+                tokens.put(hash, values);
+            }
+
+            builder.addQueryParameter("s", values.getFirst());
+            builder.addQueryParameter("t", values.getSecond());
+        } else {
+            builder.addQueryParameter("p", password);
         }
 
-        builder.addQueryParameter("u", username);
-        builder.addQueryParameter("s", values.getFirst());
-        builder.addQueryParameter("t", values.getSecond());
         builder.addQueryParameter("v", Constants.REST_PROTOCOL_VERSION_SUBSONIC);
         builder.addQueryParameter("c", Constants.REST_CLIENT_ID);
 
@@ -1134,5 +1153,11 @@ public final class Util {
         }
 
         return random;
+    }
+
+    public static void hideKeyboard(View view) {
+        InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Activity.INPUT_METHOD_SERVICE);
+
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 }

@@ -25,6 +25,7 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import net.nullsum.audinaut.R;
 import net.nullsum.audinaut.domain.Genre;
 import net.nullsum.audinaut.domain.Indexes;
 import net.nullsum.audinaut.domain.MusicDirectory;
@@ -591,7 +592,7 @@ public class RESTMusicService implements MusicService {
     public Response getDownloadInputStream(Context context, MusicDirectory.Entry song, long offset, int maxBitrate, SilentBackgroundTask task) throws Exception {
 
         OkHttpClient eagerClient = client.newBuilder()
-                .readTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(Util.getNetworkTimeoutMs(context), TimeUnit.MILLISECONDS)
                 .build();
 
         Map<String, String> parameters = new HashMap<>();
@@ -656,24 +657,17 @@ public class RESTMusicService implements MusicService {
     }
 
     @Override
-    public User getUser(boolean refresh, String username, Context context, ProgressListener progressListener) throws Exception {
-        Map<String, String> parameters = new HashMap<>();
+    public void startScan(Context context) throws Exception {
+        String url = getRestUrl(context, "startScan", null);
 
-        parameters.put("username", username);
-
-        String url = getRestUrl(context, "getUser", parameters);
-
-        Request request = new Request.Builder()
-                .url(url)
-                .build();
+        Request request = new Request.Builder().url(url).build();
 
         try (Response response = client.newCall(request).execute()) {
-            List<User> users = new UserParser(context, getInstance(context)).parse(response.body().byteStream());
-            if (users.size() > 0) {
-                // Should only have returned one anyways
-                return users.get(0);
+            if (response.isSuccessful()) {
+                Log.d(TAG, "Media scan started" + response.toString());
             } else {
-                return null;
+                Log.w(TAG, "media scan start failed" + response.toString());
+                Util.toast(context, R.string.settings_media_scan_start_failed);
             }
         }
     }

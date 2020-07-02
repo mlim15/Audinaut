@@ -44,6 +44,7 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,6 +71,7 @@ public class OfflineMusicService implements MusicService {
     public Indexes getIndexes(String musicFolderId, boolean refresh, Context context, ProgressListener progressListener) {
         List<Artist> artists = new ArrayList<>();
         List<Entry> entries = new ArrayList<>();
+
         File root = FileUtil.getMusicDirectory(context);
         for (File file : FileUtil.listFiles(root)) {
             if (file.isDirectory()) {
@@ -499,7 +501,7 @@ public class OfflineMusicService implements MusicService {
     }
 
     @Override
-    public User getUser(boolean refresh, String username, Context context, ProgressListener progressListener) throws Exception {
+    public void startScan(Context c) throws Exception {
         throw new OfflineException();
     }
 
